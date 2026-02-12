@@ -1,0 +1,36 @@
+services:
+  toshokan:
+    build: .
+    container_name: toshokan
+    depends_on:
+      toshokan-db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://toshokan:toshokan@toshokan-db:5432/toshokan
+    networks:
+      - toshokan
+    ports:
+      - "3000:3000"
+  toshokan-db:
+    container_name: toshokan-db
+    environment:
+      POSTGRES_USER: toshokan
+      POSTGRES_PASSWORD: toshokan
+      POSTGRES_DB: toshokan
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U toshokan"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    image: postgres:alpine
+    networks:
+      - toshokan
+    ports:
+      - "5432:5432"
+    volumes:
+      - toshokan-db:/var/lib/postgresql
+networks:
+  toshokan:
+    name: toshokan
+volumes:
+  toshokan-db:
