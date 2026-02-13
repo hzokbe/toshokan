@@ -1,12 +1,30 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 import type { Database } from 'src/db/database.type';
-import { BookDTO } from './book.dto';
+import { BookDTO, CreateBookDTO } from './book.dto';
 import { books } from './book.schema';
 
 @Injectable()
 export class BookService {
   constructor(@Inject('DRIZZLE_DB') private db: Database) {}
+
+  async create(dto: CreateBookDTO): Promise<BookDTO> {
+    const result = await this.db
+      .insert(books)
+      .values({
+        title: dto.title,
+        description: dto.description,
+      })
+      .returning();
+
+    const book = result[0];
+
+    return {
+      id: book.id,
+      title: book.title,
+      description: book.description ?? '',
+    };
+  }
 
   async getAll(): Promise<BookDTO[]> {
     const result = await this.db.select().from(books);
