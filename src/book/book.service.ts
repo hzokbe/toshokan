@@ -2,6 +2,7 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 import type { Database } from 'src/db/database.type';
 import { BookDTO, CreateBookDTO } from './book.dto';
+import { BookTitleAlreadyExistsException } from './book.exception';
 import { books } from './book.schema';
 
 @Injectable()
@@ -9,6 +10,15 @@ export class BookService {
   constructor(@Inject('DRIZZLE_DB') private db: Database) {}
 
   async create(dto: CreateBookDTO): Promise<BookDTO> {
+    const exists = await this.db
+      .select()
+      .from(books)
+      .where(eq(books.title, dto.title));
+
+    if (exists.length != 0) {
+      throw new BookTitleAlreadyExistsException();
+    }
+
     const result = await this.db
       .insert(books)
       .values({
