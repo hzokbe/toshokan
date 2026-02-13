@@ -1,10 +1,15 @@
-import { Controller, Get, Param } from '@nestjs/common';
-import { BookDTO } from './book.dto';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { BookDTO, CreateBookDTO } from './book.dto';
 import { BookService } from './book.service';
 
 @Controller('books')
 export class BookController {
   constructor(private service: BookService) {}
+
+  @Post()
+  async create(@Body() dto: CreateBookDTO): Promise<BookDTO> {
+    return this.service.create(dto);
+  }
 
   @Get()
   async getAll(): Promise<BookDTO[]> {
