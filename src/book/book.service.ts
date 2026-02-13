@@ -1,4 +1,5 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { eq } from 'drizzle-orm';
 import type { Database } from 'src/db/database.type';
 import { BookDTO } from './book.dto';
 import { books } from './book.schema';
@@ -15,5 +16,21 @@ export class BookService {
       title: b.title,
       description: b.description ?? '',
     }));
+  }
+
+  async getById(id: string): Promise<BookDTO> {
+    const result = await this.db.select().from(books).where(eq(books.id, id));
+
+    if (result.length == 0) {
+      throw new NotFoundException('book not found');
+    }
+
+    const book = result[0];
+
+    return {
+      id: book.id,
+      title: book.title,
+      description: book.description ?? '',
+    };
   }
 }
