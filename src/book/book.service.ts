@@ -11,11 +11,7 @@ export class BookService {
   constructor(@Inject('DRIZZLE_DB') private db: Database) {}
 
   async create(dto: CreateBookDTO): Promise<BookDTO> {
-    const exists =
-      (await this.db.select().from(books).where(eq(books.title, dto.title)))
-        .length != 0;
-
-    if (exists) {
+    if (await this.existsByTitle(dto.title)) {
       throw new BookTitleAlreadyExistsException();
     }
 
@@ -84,5 +80,12 @@ export class BookService {
       title: book.title,
       description: book.description ?? '',
     };
+  }
+
+  private async existsByTitle(title: string): Promise<boolean> {
+    return (
+      (await this.db.select().from(books).where(eq(books.title, title)))
+        .length != 0
+    );
   }
 }
