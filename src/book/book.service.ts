@@ -55,6 +55,10 @@ export class BookService {
   async update(id: string, dto: UpdateBookDTO): Promise<BookDTO> {
     this.getBookById(id);
 
+    if (dto.title && (await this.existsByTitle(dto.title))) {
+      throw new BookTitleAlreadyExistsException();
+    }
+
     const result = await this.db.update(books).set(dto).returning();
 
     const book = result[0];
