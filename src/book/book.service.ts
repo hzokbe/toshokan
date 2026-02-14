@@ -1,7 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 import type { Database } from 'src/db/database.type';
-import { BookDTO, CreateBookDTO } from './book.dto';
+import { BookDTO, CreateBookDTO, UpdateBookDTO } from './book.dto';
 import { BookTitleAlreadyExistsException } from './book.exception';
 import { books } from './book.schema';
 import { Book } from './book.type';
@@ -48,6 +48,20 @@ export class BookService {
 
   async getById(id: string): Promise<BookDTO> {
     const book = await this.getBookById(id);
+
+    return {
+      id: book.id,
+      title: book.title,
+      description: book.description ?? '',
+    };
+  }
+
+  async update(id: string, dto: UpdateBookDTO): Promise<BookDTO> {
+    this.getBookById(id);
+
+    const result = await this.db.update(books).set(dto).returning();
+
+    const book = result[0];
 
     return {
       id: book.id,
