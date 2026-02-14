@@ -1,3 +1,4 @@
+import { PartialType } from '@nestjs/mapped-types';
 import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
@@ -14,6 +15,8 @@ export class CreateBookDTO {
   @MaxLength(64)
   description: string;
 }
+
+export class UpdateBookDTO extends PartialType(CreateBookDTO) {}
 
 export interface BookDTO {
   id: string;

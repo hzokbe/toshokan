@@ -1,21 +1,17 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 import type { Database } from 'src/db/database.type';
-import { BookDTO, CreateBookDTO } from './book.dto';
+import { BookDTO, CreateBookDTO, UpdateBookDTO } from './book.dto';
 import { BookTitleAlreadyExistsException } from './book.exception';
 import { books } from './book.schema';
+import { Book } from './book.type';
 
 @Injectable()
 export class BookService {
   constructor(@Inject('DRIZZLE_DB') private db: Database) {}
 
   async create(dto: CreateBookDTO): Promise<BookDTO> {
-    const exists = await this.db
-      .select()
-      .from(books)
-      .where(eq(books.title, dto.title));
-
-    if (exists.length != 0) {
+    if (await this.existsByTitle(dto.title)) {
       throw new BookTitleAlreadyExistsException();
     }
 
@@ -47,6 +43,34 @@ export class BookService {
   }
 
   async getById(id: string): Promise<BookDTO> {
+    const book = await this.getBookById(id);
+
+    return {
+      id: book.id,
+      title: book.title,
+      description: book.description ?? '',
+    };
+  }
+
+  async update(id: string, dto: UpdateBookDTO): Promise<BookDTO> {
+    this.getBookById(id);
+
+    if (dto.title && (await this.existsByTitle(dto.title))) {
+      throw new BookTitleAlreadyExistsException();
+    }
+
+    const result = await this.db.update(books).set(dto).returning();
+
+    const book = result[0];
+
+    return {
+      id: book.id,
+      title: book.title,
+      description: book.description ?? '',
+    };
+  }
+
+  private async getBookById(id: string): Promise<Book> {
     const result = await this.db.select().from(books).where(eq(books.id, id));
 
     if (result.length == 0) {
@@ -60,5 +84,12 @@ export class BookService {
       title: book.title,
       description: book.description ?? '',
     };
+  }
+
+  private async existsByTitle(title: string): Promise<boolean> {
+    return (
+      (await this.db.select().from(books).where(eq(books.title, title)))
+        .length != 0
+    );
   }
 }
