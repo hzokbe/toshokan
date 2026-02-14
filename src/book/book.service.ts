@@ -4,6 +4,7 @@ import type { Database } from 'src/db/database.type';
 import { BookDTO, CreateBookDTO } from './book.dto';
 import { BookTitleAlreadyExistsException } from './book.exception';
 import { books } from './book.schema';
+import { Book } from './book.type';
 
 @Injectable()
 export class BookService {
@@ -47,6 +48,16 @@ export class BookService {
   }
 
   async getById(id: string): Promise<BookDTO> {
+    const book = await this.getBookById(id);
+
+    return {
+      id: book.id,
+      title: book.title,
+      description: book.description ?? '',
+    };
+  }
+
+  private async getBookById(id: string): Promise<Book> {
     const result = await this.db.select().from(books).where(eq(books.id, id));
 
     if (result.length == 0) {
