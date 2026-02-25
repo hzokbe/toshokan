@@ -70,6 +70,12 @@ export class BookService {
     };
   }
 
+  async delete(id: string) {
+    this.getBookById(id);
+
+    await this.db.delete(books).where(eq(books.id, id));
+  }
+
   private async getBookById(id: string): Promise<Book> {
     const result = await this.db.select().from(books).where(eq(books.id, id));
 
