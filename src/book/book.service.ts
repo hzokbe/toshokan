@@ -1,6 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 import type { Database } from 'src/db/database.type';
+import { RedisService } from 'src/redis/redis.service';
 import { BookDTO, CreateBookDTO, UpdateBookDTO } from './book.dto';
 import { BookTitleAlreadyExistsException } from './book.exception';
 import { books } from './book.schema';
@@ -8,7 +9,10 @@ import { Book } from './book.type';
 
 @Injectable()
 export class BookService {
-  constructor(@Inject('DRIZZLE_DB') private db: Database) {}
+  constructor(
+    @Inject('DRIZZLE_DB') private db: Database,
+    @Inject() private redisService: RedisService,
+  ) {}
 
   async create(dto: CreateBookDTO): Promise<BookDTO> {
     if (await this.existsByTitle(dto.title)) {
