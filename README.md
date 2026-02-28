@@ -32,6 +32,7 @@ docker compose up -d
 - **Drizzle ORM**
 - **PostgreSQL**
 - **Docker**
+- **Redis**
 
 ---
 
