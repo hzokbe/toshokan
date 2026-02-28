@@ -45,6 +45,8 @@ export class RedisService implements OnModuleInit, OnApplicationShutdown {
   }
 
   async set<T>(key: string, value: T) {
-    await this.client.set(key, JSON.stringify(value));
+    await this.client.set(key, JSON.stringify(value), {
+      expiration: { type: 'EX', value: 30 },
+    });
   }
 }
