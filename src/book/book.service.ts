@@ -37,13 +37,21 @@ export class BookService {
   }
 
   async getAll(): Promise<BookDTO[]> {
-    const result = await this.db.select().from(books);
+    const dtos = await this.redisService.get<BookDTO[]>('books');
 
-    return result.map((b) => ({
+    if (dtos) {
+      return dtos;
+    }
+
+    const result = (await this.db.select().from(books)).map((b) => ({
       id: b.id,
       title: b.title,
       description: b.description ?? '',
     }));
+
+    this.redisService.set('books', result);
+
+    return result;
   }
 
   async getById(id: string): Promise<BookDTO> {
