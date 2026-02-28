@@ -5,6 +5,8 @@ services:
     depends_on:
       toshokan-db:
         condition: service_healthy
+      toshokan-redis:
+        condition: service_healthy
     environment:
       DATABASE_URL: postgresql://toshokan:toshokan@toshokan-db:5432/toshokan
     networks:
@@ -29,6 +31,18 @@ services:
       - "5432:5432"
     volumes:
       - toshokan-db:/var/lib/postgresql
+  toshokan-redis:
+    container_name: toshokan-redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    image: redis:alpine
+    networks:
+      - toshokan
+    ports:
+      - "6379:6379"
 networks:
   toshokan:
     name: toshokan
