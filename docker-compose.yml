@@ -44,6 +44,13 @@ services:
       - toshokan
     ports:
       - "6379:6379"
+  toshokan-client:
+    build: ./client
+    container_name: toshokan-client
+    networks:
+      - toshokan
+    ports:
+      - "5173:5173"
 networks:
   toshokan:
     name: toshokan
