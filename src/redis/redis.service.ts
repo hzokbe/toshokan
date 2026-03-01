@@ -4,6 +4,7 @@ import {
   OnApplicationShutdown,
   OnModuleInit,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { createClient, RedisClientType } from 'redis';
 
 @Injectable()
@@ -12,8 +13,10 @@ export class RedisService implements OnModuleInit, OnApplicationShutdown {
 
   private readonly logger = new Logger(RedisService.name);
 
-  constructor() {
-    this.client = createClient();
+  constructor(configService: ConfigService) {
+    this.client = createClient({
+      url: configService.get<string>('REDIS_URL'),
+    });
   }
 
   async onModuleInit() {

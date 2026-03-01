@@ -9,6 +9,7 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://toshokan:toshokan@toshokan-db:5432/toshokan
+      REDIS_URL: redis://toshokan-redis:6379
     networks:
       - toshokan
     ports:
