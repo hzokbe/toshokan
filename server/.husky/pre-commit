@@ -1,6 +1,6 @@
 #!/bin/bash
 
-npx lint-staged || exit 1
+cd ./server && npx lint-staged || exit 1
 
 if [ $? -ne 0 ]; then
   exit 1
