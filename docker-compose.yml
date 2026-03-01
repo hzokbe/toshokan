@@ -1,6 +1,6 @@
 services:
   toshokan:
-    build: .
+    build: ./server
     container_name: toshokan
     depends_on:
       toshokan-db:
